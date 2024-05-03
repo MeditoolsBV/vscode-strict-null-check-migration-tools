@@ -5,7 +5,7 @@ const { forStrictNullCheckEligibleFiles, forEachFileInSrc } = require('./src/get
 const { getImportsForFile } = require('./src/tsHelper');
 
 const vscodeRoot = path.join(process.cwd(), process.argv[2]);
-const srcRoot = path.join(vscodeRoot, 'src');
+const srcRoot = path.join(vscodeRoot);
 
 let sort = true;
 let filter;

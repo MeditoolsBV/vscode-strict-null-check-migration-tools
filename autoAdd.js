@@ -7,7 +7,7 @@ const config = require('./src/config');
 const { forStrictNullCheckEligibleFiles } = require('./src/getStrictNullCheckEligibleFiles');
 
 const vscodeRoot = path.join(process.cwd(), process.argv[2]);
-const srcRoot = path.join(vscodeRoot, 'src');
+const srcRoot = path.join(vscodeRoot);
 
 const buildCompletePattern = /Found (\d+) errors?\. Watching for file changes\./gi;
 

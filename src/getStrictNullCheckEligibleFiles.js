@@ -29,7 +29,7 @@ module.exports.forEachFileInSrc = forEachFileInSrc;
  * @param {{ includeTests: boolean }} [options]
  */
 module.exports.forStrictNullCheckEligibleFiles = async (vscodeRoot, forEach, options) => {
-    const srcRoot = path.join(vscodeRoot, 'src');
+    const srcRoot = path.join(vscodeRoot);
 
     const tsconfig = require(path.join(vscodeRoot, config.targetTsconfig));
     const checkedFiles = await getCheckedFiles(tsconfig, srcRoot);

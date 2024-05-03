@@ -4,12 +4,14 @@ const ts = require('typescript');
 const fs = require('fs');
 
 module.exports.getImportsForFile = function getImportsForFile(file, srcRoot) {
-    const fileInfo = ts.preProcessFile(fs.readFileSync(file).toString());
+    const fileInfo = ts.preProcessFile(fs.readFileSync(file).toString());    
     return fileInfo.importedFiles
         .map(importedFile => importedFile.fileName)
         .filter(fileName => !/^vs\/css!/.test(fileName)) // remove css imports
-        .filter(x => /\//.test(x)) // remove node modules (the import must contain '/')
-        .map(fileName => {
+        .filter(fileName => {
+            return  fs.existsSync(`${fileName}.ts`) || fs.existsSync(`${fileName}.js`) || fs.existsSync(`${fileName}.d.ts`);
+        }) // remove node modules (the import must contain '/', file does not exist locally)
+        .map(fileName => {            
             if (/(^\.\/)|(^\.\.\/)/.test(fileName)) {
                 return path.join(path.dirname(file), fileName);
             }
