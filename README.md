@@ -21,3 +21,11 @@ Very simple script that tries to auto add any eligible file to the `tsconfig.str
 ```bash
 $ node autoAdd.js /path/to/vscode
 ```
+
+**autoAddFromIndex.js**
+
+Very simple script that tries to auto add the output from index.js to the `tsconfig.strictNullChecks.json`. This iteratively compiles the `tsconfig` project with just that file added. If there are no errors, it is added to the `tsconfig`. There is much more chance of success of this vs autoAdd.js
+
+```bash
+$ node autoAdd.js /path/to/vscode
+```

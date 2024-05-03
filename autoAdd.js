@@ -14,7 +14,7 @@ const buildCompletePattern = /Found (\d+) errors?\. Watching for file changes\./
 forStrictNullCheckEligibleFiles(vscodeRoot, () => { }).then(async (files) => {
     const tsconfigPath = path.join(vscodeRoot, config.targetTsconfig);
     console.log('spawning child process...')
-    const child = child_process.spawn('yarn', [ 'run', 'tsc','-p', tsconfigPath, '--watch']);
+    const child = child_process.spawn('yarn', [ '--cwd', vscodeRoot, 'run', 'tsc','-p', tsconfigPath, '--watch']);
     console.log('spawned child process...')
     const errorListener = (error) => {
         console.log(error)
