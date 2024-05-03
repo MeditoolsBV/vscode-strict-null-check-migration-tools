@@ -7,10 +7,7 @@ module.exports.getImportsForFile = function getImportsForFile(file, srcRoot) {
     const fileInfo = ts.preProcessFile(fs.readFileSync(file).toString());    
     return fileInfo.importedFiles
         .map(importedFile => importedFile.fileName)
-        .filter(fileName => !/^vs\/css!/.test(fileName)) // remove css imports
-        .filter(fileName => {
-            return  fs.existsSync(`${fileName}.ts`) || fs.existsSync(`${fileName}.js`) || fs.existsSync(`${fileName}.d.ts`);
-        }) // remove node modules (the import must contain '/', file does not exist locally)
+        .filter(fileName => !/^src/.test(fileName)) // remove css imports        
         .map(fileName => {            
             if (/(^\.\/)|(^\.\.\/)/.test(fileName)) {
                 return path.join(path.dirname(file), fileName);
@@ -19,6 +16,8 @@ module.exports.getImportsForFile = function getImportsForFile(file, srcRoot) {
                 return path.join(srcRoot, fileName);
             }
             return fileName;
+        }).filter(pathPlusFile => {
+            return fs.existsSync(`${pathPlusFile}.ts`) || fs.existsSync(`${pathPlusFile}.js`) || fs.existsSync(`${pathPlusFile}.d.ts`);
         }).map(fileName => {
             if (fs.existsSync(`${fileName}.ts`)) {
                 return `${fileName}.ts`;
