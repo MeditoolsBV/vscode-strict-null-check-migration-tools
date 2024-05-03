@@ -12,12 +12,14 @@ const srcRoot = path.join(vscodeRoot, 'src');
 const buildCompletePattern = /Found (\d+) errors?\. Watching for file changes\./gi;
 
 forStrictNullCheckEligibleFiles(vscodeRoot, () => { }).then(async (files) => {
-    const tsconfigPath = path.join(srcRoot, config.targetTsconfig);
-
+    const tsconfigPath = path.join(vscodeRoot, config.targetTsconfig);
+    console.log('spawning child process...')
     const child = child_process.spawn('tsc', ['-p', tsconfigPath, '--watch']);
+    console.log('spawned child process...')
     for (const file of files) {
         await tryAutoAddStrictNulls(child, tsconfigPath, file);
     }
+    console.log('killing child process...')
     child.kill();
 });
 
@@ -26,12 +28,12 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
         const relativeFilePath = path.relative(srcRoot, file);
         console.log(`Trying to auto add '${relativeFilePath}'`);
 
-        const originalConifg = JSON.parse(fs.readFileSync(tsconfigPath).toString());
-        originalConifg.files = Array.from(new Set(originalConifg.files.sort()));
+        const originalConfig = JSON.parse(fs.readFileSync(tsconfigPath).toString());
+        originalConfig.files = Array.from(new Set(originalConfig.files.sort()));
 
         // Config on accept
-        const newConfig = Object.assign({}, originalConifg);
-        newConfig.files = Array.from(new Set(originalConifg.files.concat('./' + relativeFilePath).sort()));
+        const newConfig = Object.assign({}, originalConfig);
+        newConfig.files = Array.from(new Set(originalConfig.files.concat('./' + relativeFilePath).sort()));
 
         fs.writeFileSync(tsconfigPath, JSON.stringify(newConfig, null, '\t'));
 
@@ -46,7 +48,7 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
                 }
                 else {
                     console.log(`💥 - ${errorCount}`);
-                    fs.writeFileSync(tsconfigPath, JSON.stringify(originalConifg, null, '\t'));
+                    fs.writeFileSync(tsconfigPath, JSON.stringify(originalConfig, null, '\t'));
                 }
                 resolve();
                 child.stdout.removeListener('data', listener);

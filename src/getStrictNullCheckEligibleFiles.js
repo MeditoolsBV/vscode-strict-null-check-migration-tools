@@ -10,7 +10,7 @@ const config = require('./config');
  */
 const forEachFileInSrc = (srcRoot, options) => {
     return new Promise((resolve, reject) => {
-        glob(`${srcRoot}/vs/**/*.ts`, (err, files) => {
+        glob(`${srcRoot}/src/**/*.ts`, (err, files) => {
             if (err) {
                 return reject(err);
             }
@@ -31,7 +31,7 @@ module.exports.forEachFileInSrc = forEachFileInSrc;
 module.exports.forStrictNullCheckEligibleFiles = async (vscodeRoot, forEach, options) => {
     const srcRoot = path.join(vscodeRoot, 'src');
 
-    const tsconfig = require(path.join(srcRoot, config.targetTsconfig));
+    const tsconfig = require(path.join(vscodeRoot, config.targetTsconfig));
     const checkedFiles = await getCheckedFiles(tsconfig, srcRoot);
 
     const imports = new Map();
