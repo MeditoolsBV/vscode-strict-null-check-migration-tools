@@ -10,7 +10,7 @@ const config = require('./config');
  */
 const forEachFileInSrc = (srcRoot, options) => {
     return new Promise((resolve, reject) => {
-        glob(`${srcRoot}/src/**/*.ts`, (err, files) => {
+        glob(`${srcRoot}/src/**/*.ts*`, (err, files) => {
             if (err) {
                 return reject(err);
             }
@@ -50,19 +50,20 @@ module.exports.forStrictNullCheckEligibleFiles = async (vscodeRoot, forEach, opt
         .filter(file => !config.skippedFiles.has(path.relative(srcRoot, file)))
         .filter(file => {
             const allProjImports = getMemoizedImportsForFile(file, srcRoot);
-
             const nonCheckedImports = allProjImports
                 .filter(x => x !== file)
                 .filter(imp => {
-                    if (checkedFiles.has(imp)) {
+                    if (checkedFiles.has(imp)) {                        
                         return false;
                     }
                     // Don't treat cycles as blocking
                     const impImports = getMemoizedImportsForFile(imp, srcRoot);
-                    return impImports.filter(x => x !== file).filter(x => !checkedFiles.has(x)).length !== 0;
+                    //if(print) console.log(impImports.filter(x => x !== file).filter(x => !checkedFiles.has(x)).length !== 0)
+                    //return impImports.filter(x => x !== file).filter(x => !checkedFiles.has(x)).length !== 0;\
+                    return true
                 });
-
-            const isEdge = nonCheckedImports.length === 0;
+            
+            const isEdge = nonCheckedImports.length === 0;           
             if (isEdge) {
                 forEach(file);
             }

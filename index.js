@@ -19,7 +19,7 @@ if (false) { // Generate test files listing
     includeTests = true;
 }
 
-forStrictNullCheckEligibleFiles(vscodeRoot, () => { }, { includeTests }).then(async eligibleFiles => {
+forStrictNullCheckEligibleFiles(vscodeRoot, () => {}, { includeTests }).then(async eligibleFiles => {
     const eligibleSet = new Set(eligibleFiles);
 
     const dependedOnCount = new Map(eligibleFiles.map(file => [file, 0]));

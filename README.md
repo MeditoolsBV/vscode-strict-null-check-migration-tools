@@ -8,7 +8,7 @@ $ npm install
 
 **index.js**
 
-The main script prints of list of files that are eligible for strict null checks. This includes all files that only import files thare are already strict null checked. 
+The main script prints of list of files that are eligible for strict null checks. This includes all files that only import files that are already strict null checked. 
 
 ```bash
 $ node index.js /path/to/vscode
