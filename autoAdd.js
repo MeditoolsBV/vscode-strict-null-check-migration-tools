@@ -14,8 +14,13 @@ const buildCompletePattern = /Found (\d+) errors?\. Watching for file changes\./
 forStrictNullCheckEligibleFiles(vscodeRoot, () => { }).then(async (files) => {
     const tsconfigPath = path.join(vscodeRoot, config.targetTsconfig);
     console.log('spawning child process...')
-    const child = child_process.spawn('tsc', ['-p', tsconfigPath, '--watch']);
+    const child = child_process.spawn('yarn', [ 'run', 'tsc','-p', tsconfigPath, '--watch']);
     console.log('spawned child process...')
+    const errorListener = (error) => {
+        console.log(error)
+        return false
+    }
+    child.on('error', errorListener);
     for (const file of files) {
         await tryAutoAddStrictNulls(child, tsconfigPath, file);
     }
@@ -54,6 +59,7 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
                 child.stdout.removeListener('data', listener);
             }
         };
+
         child.stdout.on('data', listener);
     });
 }
