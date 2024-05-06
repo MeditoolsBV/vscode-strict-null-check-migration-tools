@@ -15,13 +15,14 @@ const buildCompletePattern = /Found (\d+) errors?\. Watching for file changes\./
 forStrictNullCheckEligibleFiles(vscodeRoot, () => { }).then(async (files) => {
     const tsconfigPath = path.join(vscodeRoot, config.targetTsconfig);
     console.log('spawning child process...')
-    const child = child_process.spawn('yarn', [ '--cwd', vscodeRoot, 'run', 'tsc','-p', tsconfigPath, '--watch']);
+    const child = child_process.spawn('yarn', [ '--cwd', vscodeRoot, 'null:check', '--watch']);
     console.log('spawned child process...')
-    const errorListener = (error) => {
-        console.log(error)
+    const loggingListener = (data) => {
+        console.log(data.toString())
         return false
     }
-    //child.on('error', errorListener);
+    child.on('error', loggingListener);
+    child.stdout.on('data', loggingListener);
     const firstSet = await getDependingOnNothingFiles(files)
     for (const file of firstSet) {
         await tryAutoAddStrictNulls(child, tsconfigPath, file);
@@ -69,11 +70,8 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
         const newConfig = Object.assign({}, originalConfig);
         newConfig.files = Array.from(new Set(originalConfig.files.concat('./' + relativeFilePath).sort()));
 
-        fs.writeFileSync(tsconfigPath, JSON.stringify(newConfig, null, '\t'));
-
         const listener = (data) => {
             const textOut = data.toString();
-            //console.log(textOut)
             const match = buildCompletePattern.exec(textOut);
             if (match) {
                 const errorCount = +match[1];
@@ -85,11 +83,23 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
                     console.log(`💥 - ${errorCount}`);
                     fs.writeFileSync(tsconfigPath, JSON.stringify(originalConfig, null, '\t'));
                 }
-                resolve();
+                
                 child.stdout.removeListener('data', listener);
+                console.log('removed listener')
+                resolve();
             }
         };
 
+        
         child.stdout.on('data', listener);
+        console.log('added listener')
+        //sometimes the update does not trigger if we immediately write. So, add a short timeout here
+        //the promise will resolve from the listener
+        setTimeout(() => fs.writeFileSync(tsconfigPath, JSON.stringify(newConfig, null, '\t')), 200)        
+        console.log('updated config file')
     });
 }
+
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+  } 

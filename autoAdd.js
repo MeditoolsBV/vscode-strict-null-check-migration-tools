@@ -16,11 +16,12 @@ forStrictNullCheckEligibleFiles(vscodeRoot, () => { }).then(async (files) => {
     console.log('spawning child process...')
     const child = child_process.spawn('yarn', [ '--cwd', vscodeRoot, 'run', 'tsc','-p', tsconfigPath, '--watch']);
     console.log('spawned child process...')
-    const errorListener = (error) => {
-        console.log(error)
+    const loggingListener = (data) => {
+        console.log(data)
         return false
     }
-    child.on('error', errorListener);
+    child.on('error', loggingListener);
+    //child.stdout.on('data', loggingListener);
     for (const file of files) {
         await tryAutoAddStrictNulls(child, tsconfigPath, file);
     }
@@ -40,8 +41,6 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
         const newConfig = Object.assign({}, originalConfig);
         newConfig.files = Array.from(new Set(originalConfig.files.concat('./' + relativeFilePath).sort()));
 
-        fs.writeFileSync(tsconfigPath, JSON.stringify(newConfig, null, '\t'));
-
         const listener = (data) => {
             const textOut = data.toString();
             const match = buildCompletePattern.exec(textOut);
@@ -54,12 +53,13 @@ function tryAutoAddStrictNulls(child, tsconfigPath, file) {
                 else {
                     console.log(`💥 - ${errorCount}`);
                     fs.writeFileSync(tsconfigPath, JSON.stringify(originalConfig, null, '\t'));
-                }
-                resolve();
+                }                
                 child.stdout.removeListener('data', listener);
+                resolve();
             }
         };
 
         child.stdout.on('data', listener);
+        setTimeout(() => fs.writeFileSync(tsconfigPath, JSON.stringify(newConfig, null, '\t')), 200)        
     });
 }
